@@ -1,0 +1,9 @@
+{
+  "name": "vector-tax-sale-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vector tax lien and tax sale asset marketplace prototype built with React.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
