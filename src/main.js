@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "https://esm.sh/react@19.2.6";
+import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/react@19.2.6";
 import { createRoot } from "https://esm.sh/react-dom@19.2.6/client";
+import * as L from "https://esm.sh/leaflet@1.9.4";
 import {
   ArrowRight,
   BadgeDollarSign,
@@ -22,118 +23,124 @@ const h = React.createElement;
 const properties = [
   {
     id: "VTX-1024",
-    title: "Single Family Tax Lien Certificate",
-    address: "1428 Elm Ridge Dr, Camden, NJ",
-    county: "Camden County",
-    state: "NJ",
+    title: "Baltimore Rowhome Tax Lien Certificate",
+    address: "1428 Edmondson Ave, Baltimore, MD",
+    county: "Baltimore City",
+    state: "MD",
     assetType: "Tax Lien Certificate",
-    propertyType: "Single Family",
+    propertyType: "Rowhome",
     status: "Available",
     lienAmount: 18650,
     askingPrice: 24750,
-    assessedValue: 178000,
+    assessedValue: 168000,
     redemptionWindow: "6 months",
-    interestRate: "18%",
+    interestRate: "6%",
+    coordinates: [39.2946, -76.6406],
     image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80",
-    highlights: ["Occupied block", "Clear tax record packet", "Residential exit strategy"],
+    highlights: ["Baltimore City tax sale", "Residential block", "Assignment packet pending"],
     risk: "Medium",
   },
   {
     id: "VTX-1031",
-    title: "Vacant Lot Tax Sale Position",
-    address: "88 Maple Ave, Trenton, NJ",
-    county: "Mercer County",
-    state: "NJ",
+    title: "Prince George's County Certificate",
+    address: "8801 Central Ave, Capitol Heights, MD",
+    county: "Prince George's County",
+    state: "MD",
     assetType: "Tax Sale Certificate",
-    propertyType: "Land",
+    propertyType: "Single Family",
     status: "Reviewing Offers",
     lienAmount: 9200,
     askingPrice: 13800,
-    assessedValue: 64000,
+    assessedValue: 241000,
     redemptionWindow: "4 months",
-    interestRate: "16%",
+    interestRate: "6%",
+    coordinates: [38.8889, -76.8591],
     image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80",
-    highlights: ["Low entry price", "Adjacent residential parcels", "Clean aerial review"],
-    risk: "Higher",
+    highlights: ["Suburban collateral", "Lower lien-to-value", "County records identified"],
+    risk: "Lower",
   },
   {
     id: "VTX-1042",
-    title: "Duplex Certificate Package",
-    address: "611 North 9th St, Reading, PA",
-    county: "Berks County",
-    state: "PA",
+    title: "Montgomery County Assignment",
+    address: "11700 Old Georgetown Rd, North Bethesda, MD",
+    county: "Montgomery County",
+    state: "MD",
     assetType: "Lien Portfolio",
-    propertyType: "Duplex",
+    propertyType: "Condo",
     status: "Available",
     lienAmount: 31500,
     askingPrice: 42000,
-    assessedValue: 236000,
+    assessedValue: 386000,
     redemptionWindow: "7 months",
-    interestRate: "12%",
+    interestRate: "6%",
+    coordinates: [39.0486, -77.1198],
     image: "https://images.unsplash.com/photo-1605146769289-440113cc3d00?auto=format&fit=crop&w=1200&q=80",
-    highlights: ["Two-unit asset", "Rental comps prepared", "Title notes available"],
+    highlights: ["High-value county", "Condo review needed", "Title notes available"],
     risk: "Medium",
   },
   {
     id: "VTX-1057",
-    title: "Rowhome Tax Lien Assignment",
-    address: "2406 W Clearfield St, Philadelphia, PA",
-    county: "Philadelphia County",
-    state: "PA",
+    title: "Frederick County Tax Sale Position",
+    address: "7420 Hayward Rd, Frederick, MD",
+    county: "Frederick County",
+    state: "MD",
     assetType: "Tax Lien Assignment",
-    propertyType: "Rowhome",
+    propertyType: "Commercial",
     status: "Available",
     lienAmount: 22840,
     askingPrice: 32900,
-    assessedValue: 151000,
+    assessedValue: 315000,
     redemptionWindow: "5 months",
-    interestRate: "10%",
+    interestRate: "6%",
+    coordinates: [39.4282, -77.4047],
     image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=80",
-    highlights: ["Urban resale market", "Foreclosure timeline tracked", "Interior not verified"],
+    highlights: ["Commercial diligence needed", "Growth corridor", "Exterior review complete"],
     risk: "Higher",
   },
   {
     id: "VTX-1063",
-    title: "Suburban Certificate Opportunity",
-    address: "19 Brook Hollow Ln, Wilmington, DE",
-    county: "New Castle County",
-    state: "DE",
+    title: "Anne Arundel Certificate Opportunity",
+    address: "6720 Ritchie Hwy, Glen Burnie, MD",
+    county: "Anne Arundel County",
+    state: "MD",
     assetType: "Tax Sale Certificate",
     propertyType: "Single Family",
     status: "Reserved",
     lienAmount: 14500,
     askingPrice: 19900,
-    assessedValue: 212000,
+    assessedValue: 272000,
     redemptionWindow: "8 months",
-    interestRate: "15%",
+    interestRate: "6%",
+    coordinates: [39.1905, -76.6122],
     image: "https://images.unsplash.com/photo-1576941089067-2de3c901e126?auto=format&fit=crop&w=1200&q=80",
-    highlights: ["Suburban owner-occupant area", "Low lien-to-value", "Assignment packet ready"],
+    highlights: ["Suburban location", "Low lien-to-value", "Assignment packet ready"],
     risk: "Lower",
   },
   {
     id: "VTX-1078",
-    title: "Small Commercial Tax Position",
-    address: "305 Market St, Harrisburg, PA",
-    county: "Dauphin County",
-    state: "PA",
+    title: "Eastern Shore Tax Position",
+    address: "1100 N Salisbury Blvd, Salisbury, MD",
+    county: "Wicomico County",
+    state: "MD",
     assetType: "Tax Lien Certificate",
-    propertyType: "Commercial",
+    propertyType: "Land",
     status: "Available",
     lienAmount: 48600,
     askingPrice: 67500,
-    assessedValue: 410000,
+    assessedValue: 188000,
     redemptionWindow: "6 months",
-    interestRate: "12%",
+    interestRate: "6%",
+    coordinates: [38.3839, -75.5904],
     image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
-    highlights: ["Main street frontage", "Higher value collateral", "Commercial diligence needed"],
+    highlights: ["Eastern Shore market", "Land diligence needed", "County record packet started"],
     risk: "Medium",
   },
 ];
 
 const filters = {
-  state: ["All States", "NJ", "PA", "DE"],
+  state: ["All States", "MD"],
   assetType: ["All Assets", "Tax Lien Certificate", "Tax Sale Certificate", "Tax Lien Assignment", "Lien Portfolio"],
-  propertyType: ["All Types", "Single Family", "Duplex", "Rowhome", "Commercial", "Land"],
+  propertyType: ["All Types", "Single Family", "Condo", "Rowhome", "Commercial", "Land"],
 };
 
 function money(value) {
@@ -203,8 +210,8 @@ function Hero() {
         "div",
         { className: "hero-stats", "aria-label": "Marketplace highlights" },
         h("div", null, h("strong", null, "6"), h("span", null, "Current assets")),
-        h("div", null, h("strong", null, "$95K"), h("span", null, "Lien principal")),
-        h("div", null, h("strong", null, "NJ / PA / DE"), h("span", null, "Initial markets"))
+        h("div", null, h("strong", null, "$145K"), h("span", null, "Lien principal")),
+        h("div", null, h("strong", null, "Maryland"), h("span", null, "Initial market"))
       )
     )
   );
@@ -259,8 +266,8 @@ function FilterBar({ criteria, setCriteria, query, setQuery }) {
 
 function PropertyCard({ item, onSelect }) {
   return h(
-    "article",
-    { className: "property-card" },
+    "button",
+    { className: "property-card", type: "button", onClick: () => onSelect(item) },
     h("div", { className: "property-photo", style: { backgroundImage: `url("${item.image}")` } }, h("span", null, item.status)),
     h(
       "div",
@@ -280,9 +287,86 @@ function PropertyCard({ item, onSelect }) {
         "div",
         { className: "card-footer" },
         h("span", { className: `risk risk-${item.risk.toLowerCase()}` }, `${item.risk} diligence`),
-        h("button", { className: "text-button", type: "button", onClick: () => onSelect(item) }, "Details", h(Icon, { icon: ArrowRight, size: 16 }))
+        h("span", { className: "text-button" }, "Details", h(Icon, { icon: ArrowRight, size: 16 }))
       )
     )
+  );
+}
+
+function PropertyMap({ items, selectedId, onSelect }) {
+  const mapRef = useRef(null);
+  const layerRef = useRef(null);
+  const nodeRef = useRef(null);
+
+  useEffect(() => {
+    if (!nodeRef.current || mapRef.current) return;
+
+    mapRef.current = L.map(nodeRef.current, {
+      center: [39.0458, -76.6413],
+      zoom: 8,
+      scrollWheelZoom: false,
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(mapRef.current);
+
+    layerRef.current = L.layerGroup().addTo(mapRef.current);
+
+    return () => {
+      mapRef.current.remove();
+      mapRef.current = null;
+      layerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current || !layerRef.current) return;
+
+    layerRef.current.clearLayers();
+    const bounds = [];
+
+    items.forEach((item) => {
+      if (!item.coordinates) return;
+      bounds.push(item.coordinates);
+      const isSelected = selectedId === item.id;
+      const marker = L.marker(item.coordinates, {
+        title: item.title,
+        riseOnHover: true,
+        opacity: isSelected ? 1 : 0.88,
+      });
+
+      marker
+        .bindPopup(`<strong>${item.id}</strong><br>${item.title}<br>${money(item.askingPrice)}`)
+        .on("click", () => onSelect(item))
+        .addTo(layerRef.current);
+
+      if (isSelected) {
+        marker.openPopup();
+      }
+    });
+
+    if (bounds.length === 1) {
+      mapRef.current.setView(bounds[0], 12);
+    } else if (bounds.length > 1) {
+      mapRef.current.fitBounds(bounds, { padding: [32, 32], maxZoom: 10 });
+    } else {
+      mapRef.current.setView([39.0458, -76.6413], 8);
+    }
+  }, [items, onSelect, selectedId]);
+
+  return h(
+    "aside",
+    { className: "map-panel", "aria-label": "Maryland property map" },
+    h(
+      "div",
+      { className: "map-heading" },
+      h("div", null, h("p", { className: "eyebrow" }, "Map View"), h("h3", null, "Maryland inventory")),
+      h("span", null, `${items.length} assets`)
+    ),
+    h("div", { className: "property-map", ref: nodeRef }),
+    h("p", { className: "map-note" }, "Map locations are approximate for preview. Confirm parcel-level location before publishing.")
   );
 }
 
@@ -290,13 +374,14 @@ function Inventory() {
   const [query, setQuery] = useState("");
   const [criteria, setCriteria] = useState({ state: "All States", assetType: "All Assets", propertyType: "All Types" });
   const [selected, setSelected] = useState(null);
+  const [mapSelectedId, setMapSelectedId] = useState(null);
 
   const visibleProperties = useMemo(() => {
     const term = query.trim().toLowerCase();
     return properties.filter((item) => {
       const matchesSearch =
         !term ||
-        [item.id, item.title, item.address, item.county, item.assetType, item.propertyType]
+        [item.id, item.title, item.address, item.county, item.state, item.assetType, item.propertyType]
           .join(" ")
           .toLowerCase()
           .includes(term);
@@ -321,12 +406,33 @@ function Inventory() {
       "div",
       { className: "result-row" },
       h("span", null, `${visibleProperties.length} matching assets`),
-      h("span", null, "Sample data for preview")
+      h("span", null, "Maryland sample data for preview")
     ),
     h(
       "div",
-      { className: "property-grid" },
-      visibleProperties.map((item) => h(PropertyCard, { key: item.id, item, onSelect: setSelected }))
+      { className: "inventory-layout" },
+      h(
+        "div",
+        { className: "property-grid" },
+        visibleProperties.map((item) =>
+          h(PropertyCard, {
+            key: item.id,
+            item,
+            onSelect: (property) => {
+              setMapSelectedId(property.id);
+              setSelected(property);
+            },
+          })
+        )
+      ),
+      h(PropertyMap, {
+        items: visibleProperties,
+        selectedId: mapSelectedId,
+        onSelect: (property) => {
+          setMapSelectedId(property.id);
+          setSelected(property);
+        },
+      })
     ),
     selected && h(AssetModal, { item: selected, onClose: () => setSelected(null) })
   );

@@ -388,18 +388,36 @@ button {
   font-weight: 800;
 }
 
+.inventory-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.46fr);
+  gap: 18px;
+  align-items: start;
+}
+
 .property-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
 
 .property-card {
+  display: block;
+  width: 100%;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
   box-shadow: 0 1px 0 rgba(21, 25, 31, 0.04);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.property-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: 0 16px 34px rgba(21, 25, 31, 0.08);
+  transform: translateY(-1px);
 }
 
 .property-photo {
@@ -523,10 +541,75 @@ button {
 }
 
 .text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   min-height: 36px;
   padding: 0;
   background: transparent;
   color: var(--brand);
+}
+
+.map-panel {
+  position: sticky;
+  top: 94px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 14px 42px rgba(21, 25, 31, 0.08);
+}
+
+.map-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.map-heading .eyebrow {
+  margin-bottom: 6px;
+}
+
+.map-heading h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 1.3rem;
+  line-height: 1.2;
+}
+
+.map-heading span {
+  min-width: max-content;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.property-map {
+  height: min(590px, calc(100vh - 210px));
+  min-height: 440px;
+  background: var(--soft);
+}
+
+.map-note {
+  margin: 0;
+  padding: 12px 16px 15px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-popup-content {
+  color: var(--ink);
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
 .process-section {
@@ -764,6 +847,21 @@ button {
   line-height: 1.6;
 }
 
+@media (max-width: 1120px) {
+  .inventory-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .map-panel {
+    position: static;
+  }
+
+  .property-map {
+    height: 420px;
+    min-height: 360px;
+  }
+}
+
 @media (max-width: 1040px) {
   .property-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -838,6 +936,11 @@ button {
   .filter-bar,
   .modal-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .property-map {
+    height: 340px;
+    min-height: 320px;
   }
 
   .property-card h3 {
