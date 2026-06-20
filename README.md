@@ -86,7 +86,7 @@ This works because the site is already static and does not need a build step.
 - Add bilingual English/Chinese copy
 - Add Azure Functions for form handling
 
-## Screenshots
+## Markdown
 
 ### Home Page
 
