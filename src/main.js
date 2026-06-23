@@ -5,6 +5,8 @@ import {
   BadgeDollarSign,
   Building2,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   FileText,
   Filter,
@@ -57,19 +59,23 @@ function Header() {
   return h(
     "header",
     { className: "site-header" },
-    h(Logo),
     h(
-      "nav",
-      { className: "nav-links", "aria-label": "Main navigation" },
-      h("a", { href: "#inventory" }, "Inventory"),
-      h("a", { href: "#process" }, "Process"),
-      h("a", { href: "#contact" }, "Contact")
-    ),
-    h(
-      "a",
-      { className: "header-cta", href: "#contact" },
-      "Request Packet",
-      h(Icon, { icon: ArrowRight, size: 16 })
+      "div",
+      { className: "header-inner" },
+      h(Logo),
+      h(
+        "nav",
+        { className: "nav-links", "aria-label": "Main navigation" },
+        h("a", { href: "#inventory" }, "Inventory"),
+        h("a", { href: "#process" }, "Process"),
+        h("a", { href: "#contact" }, "Contact")
+      ),
+      h(
+        "a",
+        { className: "header-cta", href: "#contact" },
+        "Request Packet",
+        h(Icon, { icon: ArrowRight, size: 16 })
+      )
     )
   );
 }
@@ -81,26 +87,30 @@ function Hero() {
     h("div", { className: "hero-image", "aria-hidden": "true" }),
     h(
       "div",
-      { className: "hero-content" },
-      h("p", { className: "eyebrow" }, "Maryland Tax Lien Certificate Marketplace"),
-      h("h1", null, "Maryland Tax Lien Certificates"),
-      h(
-        "p",
-        { className: "hero-copy" },
-        "Browse Maryland tax lien certificates, lien assignments, and property-backed opportunities prepared for qualified investor review."
-      ),
+      { className: "hero-inner" },
       h(
         "div",
-        { className: "hero-actions" },
-        h("a", { className: "button button-primary", href: "#inventory" }, "View Inventory", h(Icon, { icon: Home })),
-        h("a", { className: "button button-secondary", href: "#contact" }, "Talk to Vector", h(Icon, { icon: FileText }))
-      ),
-      h(
-        "div",
-        { className: "hero-stats", "aria-label": "Marketplace highlights" },
-        h("div", null, h("strong", null, "3"), h("span", null, "Current assets")),
-        h("div", null, h("strong", null, "$7.7K"), h("span", null, "Tax face amount")),
-        h("div", null, h("strong", null, "Maryland"), h("span", null, "Initial market"))
+        { className: "hero-content" },
+        h("p", { className: "eyebrow" }, "Maryland Tax Lien Certificate Marketplace"),
+        h("h1", null, "Maryland Tax Lien Certificates"),
+        h(
+          "p",
+          { className: "hero-copy" },
+          "Browse Maryland tax lien certificates, lien assignments, and property-backed opportunities prepared for qualified investor review."
+        ),
+        h(
+          "div",
+          { className: "hero-actions" },
+          h("a", { className: "button button-primary", href: "#inventory" }, "View Inventory", h(Icon, { icon: Home })),
+          h("a", { className: "button button-secondary", href: "#contact" }, "Talk to Vector", h(Icon, { icon: FileText }))
+        ),
+        h(
+          "div",
+          { className: "hero-stats", "aria-label": "Marketplace highlights" },
+          h("div", null, h("strong", null, "3"), h("span", null, "Current assets")),
+          h("div", null, h("strong", null, "$7.7K"), h("span", null, "Tax face amount")),
+          h("div", null, h("strong", null, "Maryland"), h("span", null, "Initial market"))
+        )
       )
     )
   );
@@ -155,12 +165,23 @@ function FilterBar({ criteria, setCriteria, query, setQuery }) {
 
 function PropertyCard({ item, onSelect }) {
   return h(
-    "button",
-    { className: "property-card", type: "button", onClick: () => onSelect(item) },
+    "article",
+    {
+      className: "property-card",
+      role: "button",
+      tabIndex: 0,
+      onClick: () => onSelect(item),
+      onKeyDown: (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect(item);
+        }
+      },
+    },
     h(
       "div",
       { className: "property-photo" },
-      h("img", { src: item.image, alt: `${item.title} in ${item.county}, Maryland` }),
+      h(ImageCarousel, { images: item.images, title: item.title, compact: true }),
       h("span", null, item.status)
     ),
     h(
@@ -172,15 +193,14 @@ function PropertyCard({ item, onSelect }) {
       h(
         "dl",
         { className: "property-metrics" },
-        h("div", null, h("dt", null, "Terms"), h("dd", null, "Request")),
         h("div", null, h("dt", null, "Tax Face"), h("dd", null, money(item.lienAmount))),
         h("div", null, h("dt", null, "Assessment"), h("dd", null, money(item.assessedValue))),
-        h("div", null, h("dt", null, "Expires"), h("dd", null, item.lienExpiration))
+        h("div", null, h("dt", null, "Expires"), h("dd", null, item.lienExpiration)),
+        h("div", null, h("dt", null, "Type"), h("dd", null, item.propertyType))
       ),
       h(
         "div",
         { className: "card-footer" },
-        h("span", { className: "risk risk-review" }, "Diligence required"),
         h("span", { className: "text-button" }, "Details", h(Icon, { icon: ArrowRight, size: 16 }))
       )
     )
@@ -223,7 +243,39 @@ function AssetLocationMap({ item }) {
   );
 }
 
-function Inventory({ properties, loading }) {
+function ImageCarousel({ images, title, compact = false }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const hasMultipleImages = images.length > 1;
+  const image = images[activeIndex];
+
+  function move(direction, event) {
+    event.stopPropagation();
+    setActiveIndex((current) => (current + direction + images.length) % images.length);
+  }
+
+  return h(
+    "div",
+    { className: compact ? "image-carousel image-carousel-compact" : "image-carousel" },
+    h("img", { src: image, alt: `${title} property photo ${activeIndex + 1}`, loading: compact ? "eager" : "lazy" }),
+    hasMultipleImages &&
+      h(
+        React.Fragment,
+        null,
+        h(
+          "button",
+          { className: "gallery-arrow gallery-arrow-prev", type: "button", title: "Previous photo", "aria-label": "Previous photo", onClick: (event) => move(-1, event) },
+          h(Icon, { icon: ChevronLeft, size: 20 })
+        ),
+        h(
+          "button",
+          { className: "gallery-arrow gallery-arrow-next", type: "button", title: "Next photo", "aria-label": "Next photo", onClick: (event) => move(1, event) },
+          h(Icon, { icon: ChevronRight, size: 20 })
+        )
+      )
+  );
+}
+
+function Inventory({ properties, loading, onRequest }) {
   const [query, setQuery] = useState("");
   const [criteria, setCriteria] = useState({ state: "All States", assetType: "All Assets", propertyType: "All Types" });
   const [selected, setSelected] = useState(null);
@@ -249,6 +301,9 @@ function Inventory({ properties, loading }) {
     { id: "inventory", className: "section inventory-section" },
     h(
       "div",
+      { className: "section-inner" },
+    h(
+      "div",
       { className: "section-heading split-heading" },
       h("div", null, h("p", { className: "eyebrow" }, "Maryland Inventory"), h("h2", null, "Tax lien certificates ready for investor review")),
       h("p", null, "Each Maryland tax lien listing is a starting point for due diligence, certificate review, title questions, and transaction terms. Confirm the certificate, parcel, foreclosure process, and closing documents before purchase.")
@@ -266,12 +321,19 @@ function Inventory({ properties, loading }) {
       visibleProperties.map((item) => h(PropertyCard, { key: item.id, item, onSelect: setSelected })),
       !loading && visibleProperties.length === 0 && h("p", { className: "empty-results" }, "No assets match the current filters.")
     ),
-    selected && h(AssetModal, { item: selected, onClose: () => setSelected(null) })
+      selected && h(AssetModal, { item: selected, onClose: () => setSelected(null), onRequest })
+    )
   );
 }
 
-function AssetModal({ item, onClose }) {
-  const [activeImage, setActiveImage] = useState(item.image);
+function AssetModal({ item, onClose, onRequest }) {
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const activeImage = item.images[activeImageIndex];
+  const hasMultipleImages = item.images.length > 1;
+
+  function moveImage(direction) {
+    setActiveImageIndex((current) => (current + direction + item.images.length) % item.images.length);
+  }
 
   return h(
     "div",
@@ -286,39 +348,56 @@ function AssetModal({ item, onClose }) {
       ),
       h(
         "div",
-        { className: "modal-media" },
-        h("div", { className: "modal-photo" }, h("img", { src: activeImage, alt: `${item.title} in ${item.county}, Maryland` })),
-        item.images.length > 1 &&
-          h(
-            "div",
-            { className: "photo-thumbnails", "aria-label": "Property photos" },
-            item.images.map((image, index) =>
+        { className: "modal-scroll" },
+        h(
+          "div",
+          { className: "modal-media" },
+          h("div", { className: "modal-photo" }, h("img", { src: activeImage, alt: `${item.title} in ${item.county}, Maryland` })),
+          hasMultipleImages &&
+            h(
+              React.Fragment,
+              null,
               h(
                 "button",
-                {
-                  type: "button",
-                  className: image === activeImage ? "photo-thumb active" : "photo-thumb",
-                  onClick: () => setActiveImage(image),
-                  "aria-label": `View property photo ${index + 1}`,
-                  key: image,
-                },
-                h("img", { src: image, alt: "" })
+                { className: "gallery-arrow gallery-arrow-prev", type: "button", title: "Previous photo", "aria-label": "Previous photo", onClick: () => moveImage(-1) },
+                h(Icon, { icon: ChevronLeft, size: 22 })
+              ),
+              h(
+                "button",
+                { className: "gallery-arrow gallery-arrow-next", type: "button", title: "Next photo", "aria-label": "Next photo", onClick: () => moveImage(1) },
+                h(Icon, { icon: ChevronRight, size: 22 })
+              ),
+              h(
+                "div",
+                { className: "photo-thumbnails", "aria-label": "Property photos" },
+                item.images.map((image, index) =>
+                  h(
+                    "button",
+                    {
+                      type: "button",
+                      className: index === activeImageIndex ? "photo-thumb active" : "photo-thumb",
+                      onClick: () => setActiveImageIndex(index),
+                      "aria-label": `View property photo ${index + 1}`,
+                      key: image,
+                    },
+                    h("img", { src: image, alt: "" })
+                  )
+                )
               )
             )
-          )
-      ),
-      h(
-        "div",
-        { className: "modal-content" },
+        ),
+        h(
+          "div",
+          { className: "modal-content" },
         h("p", { className: "eyebrow" }, item.id),
         h("h3", { id: "asset-title" }, item.title),
         h("p", { className: "address" }, h(Icon, { icon: MapPin, size: 16 }), item.address),
         h(
           "div",
           { className: "modal-metrics" },
-          h("div", null, h("span", null, "Offering Terms"), h("strong", null, "Request")),
           h("div", null, h("span", null, "Tax Face Amount"), h("strong", null, money(item.lienAmount))),
           h("div", null, h("span", null, "Assessed Value"), h("strong", null, money(item.assessedValue))),
+          item.marketReference && h("div", null, h("span", null, item.marketReference.label), h("strong", null, money(item.marketReference.amount))),
           h("div", null, h("span", null, "Lien Expiration"), h("strong", null, item.lienExpiration)),
           h("div", null, h("span", null, "Tax Sale Purchase"), h("strong", null, item.purchasedAtTaxSale)),
           h("div", null, h("span", null, "Year Built"), h("strong", null, item.yearBuilt)),
@@ -330,11 +409,16 @@ function AssetModal({ item, onClose }) {
           { className: "check-list" },
           item.highlights.map((point) => h("li", { key: point }, h(Icon, { icon: Check, size: 16 }), point))
         ),
-        h(AssetLocationMap, { item }),
+          h(AssetLocationMap, { item })
+        )
+      ),
+      h(
+        "div",
+        { className: "modal-action" },
         h(
           "a",
-          { className: "button button-primary full-button", href: "#contact", onClick: onClose },
-          "Request Due Diligence Packet",
+          { className: "button button-primary full-button", href: "#contact", onClick: () => { onRequest(item); onClose(); } },
+          "Request Property & Lien Details",
           h(Icon, { icon: FileText })
         )
       )
@@ -354,22 +438,26 @@ function Process() {
     { id: "process", className: "section process-section" },
     h(
       "div",
-      { className: "process-intro" },
-      h("p", { className: "eyebrow" }, "How It Works"),
-      h("h2", null, "A clearer way to review Maryland tax lien inventory"),
-      h("p", null, "The goal is not to make a legal promise online. The goal is to make the opportunity visible, organized, and easy for qualified buyers to evaluate.")
-    ),
-    h(
-      "div",
-      { className: "process-grid" },
-      steps.map((step, index) =>
-        h(
-          "article",
-          { className: "process-card", key: step.title },
-          h("span", { className: "step-number" }, `0${index + 1}`),
-          h("div", { className: "process-icon" }, h(Icon, { icon: step.icon, size: 24 })),
-          h("h3", null, step.title),
-          h("p", null, step.text)
+      { className: "section-inner process-inner" },
+      h(
+        "div",
+        { className: "process-intro" },
+        h("p", { className: "eyebrow" }, "How It Works"),
+        h("h2", null, "A clearer way to review Maryland tax lien inventory"),
+        h("p", null, "The goal is not to make a legal promise online. The goal is to make the opportunity visible, organized, and easy for qualified buyers to evaluate.")
+      ),
+      h(
+        "div",
+        { className: "process-grid" },
+        steps.map((step, index) =>
+          h(
+            "article",
+            { className: "process-card", key: step.title },
+            h("span", { className: "step-number" }, `0${index + 1}`),
+            h("div", { className: "process-icon" }, h(Icon, { icon: step.icon, size: 24 })),
+            h("h3", null, step.title),
+            h("p", null, step.text)
+          )
         )
       )
     )
@@ -380,15 +468,21 @@ function TrustBand() {
   return h(
     "section",
     { className: "trust-band", "aria-label": "Investor review points" },
-    h("div", null, h(Icon, { icon: Landmark, size: 22 }), h("span", null, "County records first")),
-    h("div", null, h(Icon, { icon: Clock3, size: 22 }), h("span", null, "Redemption timeline tracked")),
-    h("div", null, h(Icon, { icon: Building2, size: 22 }), h("span", null, "Property-backed positions")),
-    h("div", null, h(Icon, { icon: FileText, size: 22 }), h("span", null, "Document packet on request"))
+    h(
+      "div",
+      { className: "trust-inner" },
+      h("div", null, h(Icon, { icon: Landmark, size: 22 }), h("span", null, "County records first")),
+      h("div", null, h(Icon, { icon: Clock3, size: 22 }), h("span", null, "Redemption timeline tracked")),
+      h("div", null, h(Icon, { icon: Building2, size: 22 }), h("span", null, "Property-backed positions")),
+      h("div", null, h(Icon, { icon: FileText, size: 22 }), h("span", null, "Document packet on request"))
+    )
   );
 }
 
-function Contact() {
+function Contact({ requestedAsset, onClearRequestedAsset }) {
   const [formStatus, setFormStatus] = useState({ type: "idle", message: "" });
+  const defaultInterest = "Request property & lien details";
+  const [interest, setInterest] = useState(defaultInterest);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -405,6 +499,8 @@ function Contact() {
       phone,
       interest,
       message,
+      asset_id: requestedAsset?.id || "",
+      asset_address: requestedAsset?.address || "",
       source: "vectortaxlien.com",
       _subject: `Vector Tax Lien inquiry${name ? ` from ${name}` : ""}`,
       _template: "table",
@@ -437,6 +533,7 @@ function Contact() {
       }
 
       form.reset();
+      setInterest(defaultInterest);
       setFormStatus({
         type: "success",
         message: `Request sent. Vector will follow up using the contact information provided.`,
@@ -452,6 +549,9 @@ function Contact() {
   return h(
     "section",
     { id: "contact", className: "section contact-section" },
+    h(
+      "div",
+      { className: "section-inner contact-inner" },
     h(
       "div",
       { className: "contact-copy" },
@@ -484,17 +584,29 @@ function Contact() {
       h("label", null, "Name", h("input", { name: "name", placeholder: "Your name", required: true })),
       h("label", null, "Email", h("input", { name: "email", type: "email", placeholder: "you@example.com", required: true })),
       h("label", null, "Phone", h("input", { name: "phone", type: "tel", placeholder: "(555) 123-4567" })),
+      requestedAsset &&
+        h(
+          "div",
+          { className: "selected-asset" },
+          h("span", null, "Selected asset"),
+          h("strong", null, `${requestedAsset.id} - ${requestedAsset.address}`),
+          h(
+            "button",
+            { type: "button", className: "selected-asset-clear", title: "Clear selected asset", "aria-label": "Clear selected asset", onClick: () => onClearRequestedAsset() },
+            h(Icon, { icon: X, size: 17 })
+          )
+        ),
       h(
         "label",
         null,
         "Interest",
         h(
           "select",
-          { name: "interest", defaultValue: "Request due diligence packet" },
-          h("option", null, "Request due diligence packet"),
-          h("option", null, "Submit an offer"),
-          h("option", null, "Buy a portfolio"),
-          h("option", null, "Ask a legal/title question")
+          { name: "interest", value: interest, onChange: (event) => setInterest(event.target.value) },
+          h("option", { value: defaultInterest }, defaultInterest),
+          h("option", { value: "Submit an offer" }, "Submit an offer"),
+          h("option", { value: "Buy a portfolio" }, "Buy a portfolio"),
+          h("option", { value: "Ask a legal/title question" }, "Ask a legal/title question")
         )
       ),
       h("label", null, "Message", h("textarea", { name: "message", rows: 5, placeholder: "Asset ID, budget, preferred state, timeline, or questions" })),
@@ -510,6 +622,7 @@ function Contact() {
           { className: `form-status form-status-${formStatus.type}`, role: "status" },
           formStatus.message
         )
+      )
     )
   );
 }
@@ -518,14 +631,19 @@ function Footer() {
   return h(
     "footer",
     { className: "site-footer" },
-    h(Logo),
-    h("p", null, "Tax lien assets involve legal and title risk. This site is for investor review and does not replace legal, tax, or title advice.")
+    h(
+      "div",
+      { className: "footer-inner" },
+      h(Logo),
+      h("p", null, "Tax lien assets involve legal and title risk. This site is for investor review and does not replace legal, tax, or title advice.")
+    )
   );
 }
 
 function App() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [requestedAsset, setRequestedAsset] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -562,7 +680,15 @@ function App() {
     React.Fragment,
     null,
     h(Header),
-    h("main", null, h(Hero), h(TrustBand), h(Inventory, { properties, loading }), h(Process), h(Contact)),
+    h(
+      "main",
+      null,
+      h(Hero),
+      h(TrustBand),
+      h(Inventory, { properties, loading, onRequest: setRequestedAsset }),
+      h(Process),
+      h(Contact, { requestedAsset, onClearRequestedAsset: () => setRequestedAsset(null) })
+    ),
     h(Footer)
   );
 }

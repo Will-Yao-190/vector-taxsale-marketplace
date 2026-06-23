@@ -49,15 +49,20 @@ button {
   position: sticky;
   top: 0;
   z-index: 20;
+  border-bottom: 1px solid rgba(221, 227, 233, 0.9);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(18px);
+}
+
+.header-inner {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 24px;
+  width: min(100%, 1280px);
   min-height: 72px;
+  margin-inline: auto;
   padding: 12px clamp(18px, 4vw, 64px);
-  border-bottom: 1px solid rgba(221, 227, 233, 0.9);
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(18px);
 }
 
 .logo {
@@ -181,6 +186,12 @@ button {
   color: #fff;
 }
 
+.hero-inner {
+  position: relative;
+  width: min(100%, 1280px);
+  margin-inline: auto;
+}
+
 .eyebrow {
   margin: 0 0 14px;
   color: var(--brand);
@@ -245,14 +256,19 @@ button {
 }
 
 .trust-band {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px;
   border-bottom: 1px solid var(--line);
   background: var(--line);
 }
 
-.trust-band div {
+.trust-inner {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 1280px);
+  margin-inline: auto;
+  gap: 1px;
+}
+
+.trust-inner > div {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -264,12 +280,17 @@ button {
   font-weight: 850;
 }
 
-.trust-band svg {
+.trust-inner svg {
   color: var(--teal);
 }
 
 .section {
   padding: clamp(64px, 9vw, 112px) clamp(18px, 4vw, 64px);
+}
+
+.section-inner {
+  width: min(100%, 1280px);
+  margin-inline: auto;
 }
 
 .section-heading {
@@ -425,6 +446,11 @@ button {
   transform: translateY(-1px);
 }
 
+.property-card:focus-visible {
+  outline: 3px solid rgba(226, 13, 19, 0.28);
+  outline-offset: 3px;
+}
+
 .property-photo {
   position: relative;
   min-height: 210px;
@@ -432,11 +458,46 @@ button {
   background: var(--soft);
 }
 
+.image-carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .property-photo img {
   display: block;
   width: 100%;
   height: 210px;
   object-fit: cover;
+}
+
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(21, 25, 31, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--navy);
+  box-shadow: 0 6px 16px rgba(21, 25, 31, 0.16);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.gallery-arrow:hover {
+  background: #fff;
+}
+
+.gallery-arrow-prev {
+  left: 12px;
+}
+
+.gallery-arrow-next {
+  right: 12px;
 }
 
 .property-photo span {
@@ -568,10 +629,13 @@ button {
 }
 
 .process-section {
+  background: #fff;
+}
+
+.process-inner {
   display: grid;
   grid-template-columns: minmax(280px, 0.75fr) minmax(0, 1fr);
   gap: clamp(30px, 6vw, 78px);
-  background: #fff;
 }
 
 .process-intro {
@@ -623,12 +687,15 @@ button {
 }
 
 .contact-section {
+  background: var(--navy);
+  color: #fff;
+}
+
+.contact-inner {
   display: grid;
   grid-template-columns: minmax(280px, 0.8fr) minmax(320px, 0.72fr);
   gap: clamp(30px, 6vw, 82px);
   align-items: start;
-  background: var(--navy);
-  color: #fff;
 }
 
 .contact-copy h2 {
@@ -713,6 +780,50 @@ button {
   font-weight: 850;
 }
 
+.selected-asset {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  min-height: 70px;
+  padding: 13px 50px 13px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.selected-asset span {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.selected-asset strong {
+  color: #fff;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.selected-asset-clear {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+}
+
+.selected-asset-clear:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
 .form-status-success {
   color: #c9f3dc;
 }
@@ -733,11 +844,12 @@ button {
 
 .modal {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(260px, 0.76fr) minmax(360px, 1fr);
-  width: min(1080px, 100%);
+  display: flex;
+  flex-direction: column;
+  width: min(900px, 100%);
+  height: min(820px, 92vh);
   max-height: min(820px, 92vh);
-  overflow: auto;
+  overflow: hidden;
   border-radius: 8px;
   background: #fff;
   box-shadow: var(--shadow);
@@ -759,14 +871,27 @@ button {
 }
 
 .modal-media {
+  position: relative;
   display: grid;
-  grid-template-rows: minmax(360px, 1fr) auto;
-  min-height: 460px;
+  grid-template-rows: auto auto;
   background: var(--soft);
 }
 
+.modal-scroll {
+  min-height: 0;
+  overflow: auto;
+}
+
+.modal-action {
+  flex: 0 0 auto;
+  padding: 12px clamp(18px, 3vw, 28px);
+  border-top: 1px solid var(--line);
+  background: #fff;
+  box-shadow: 0 -10px 22px rgba(21, 25, 31, 0.07);
+}
+
 .modal-photo {
-  min-height: 460px;
+  aspect-ratio: 16 / 9;
   background: var(--soft);
 }
 
@@ -774,8 +899,7 @@ button {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 460px;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .photo-thumbnails {
@@ -952,14 +1076,19 @@ button {
 }
 
 .site-footer {
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+
+.footer-inner {
   display: grid;
   grid-template-columns: auto minmax(260px, 720px);
   gap: 22px;
   align-items: center;
   justify-content: space-between;
+  width: min(100%, 1280px);
+  margin-inline: auto;
   padding: 30px clamp(18px, 4vw, 64px);
-  border-top: 1px solid var(--line);
-  background: #fff;
 }
 
 .site-footer p {
@@ -984,7 +1113,7 @@ button {
 }
 
 @media (max-width: 780px) {
-  .site-header {
+  .header-inner {
     grid-template-columns: 1fr auto;
     gap: 10px;
   }
@@ -1007,11 +1136,11 @@ button {
   }
 
   .hero-stats,
-  .trust-band,
+  .trust-inner,
   .split-heading,
-  .process-section,
-  .contact-section,
-  .site-footer,
+  .process-inner,
+  .contact-inner,
+  .footer-inner,
   .modal {
     grid-template-columns: 1fr;
   }
@@ -1033,13 +1162,6 @@ button {
     position: static;
   }
 
-  .modal-photo {
-    min-height: 280px;
-  }
-
-  .modal-media {
-    min-height: 280px;
-  }
 }
 
 @media (max-width: 620px) {

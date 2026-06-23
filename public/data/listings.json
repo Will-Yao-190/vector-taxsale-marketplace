@@ -45,6 +45,10 @@
       "lienAmount": 2246.38,
       "assessedValue": 42500,
       "assessmentDate": "2024-07-01",
+      "marketReference": {
+        "label": "Zillow reference (June 2026)",
+        "amount": 46800
+      },
       "lienExpiration": "May 2027",
       "purchasedAtTaxSale": "May 2025",
       "yearBuilt": "1930",
